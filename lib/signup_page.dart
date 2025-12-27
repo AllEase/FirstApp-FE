@@ -1,27 +1,29 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'config/constants.dart';
 import 'widgets/common_text_field.dart';
-import 'cache_storage.dart';
 import 'api_client.dart';
+import 'cache_storage.dart';
 
-class LoginPage extends StatefulWidget {
-  final VoidCallback onNavigateToSignup;
-  final Function(String) onLogin;
+class SignupPage extends StatefulWidget {
+  final VoidCallback onNavigateToLogin;
+  final Function(String) onSignup;
 
-  const LoginPage({
+  const SignupPage({
     Key? key,
-    required this.onNavigateToSignup,
-    required this.onLogin,
+    required this.onNavigateToLogin,
+    required this.onSignup,
   }) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignupPage> createState() => _SignupPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignupPageState extends State<SignupPage> {
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final _phoneController = TextEditingController();
   final List<TextEditingController> _otpControllers = List.generate(
     6,
     (_) => TextEditingController(),
@@ -42,7 +44,10 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final body = {
         'number': _phoneController.text,
+        'firstName': _firstNameController.text,
+        'lastName': _lastNameController.text,
         if (_otpSent) 'otp': _enteredOtp,
+        'signup': true,
       };
       final response = await ApiClient.postWithNoToken(
         _otpSent ? Constants.verifyOtp : Constants.sendOtp,
@@ -63,26 +68,24 @@ class _LoginPageState extends State<LoginPage> {
           if (userDetails.statusCode == 200 || userDetails.statusCode == 201) {
             final userData = jsonDecode(userDetails.body);
             await CacheStorage.saveObj('user_data', userData['user']);
-            bool isSeller = userData['user']['is_seller'] ?? false;
-            await CacheStorage.save('is_seller_mode', isSeller.toString());
           }
-          widget.onLogin(data['userId'].toString());
+          widget.onSignup(data['userId'].toString());
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['error'] ?? 'Something went wrong')),
+          SnackBar(content: Text(data['error'] ?? 'Signup failed')),
         );
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Error: ${e.toString()}',
-          ), // This shows the exact error message
-          backgroundColor: Colors.red,
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Network error')));
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text('Error: ${e.toString()}'),
+      //   ),
+      // );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -91,6 +94,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void dispose() {
     _phoneController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     for (final c in _otpControllers) {
       c.dispose();
     }
@@ -104,7 +109,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(maxWidth: 448),
-      padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -116,40 +120,78 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ],
       ),
+      padding: const EdgeInsets.all(32),
       child: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.login, size: 48, color: Color(0xFF4F46E5)),
+            // Icon
+            Container(
+              width: 64,
+              height: 64,
+              decoration: const BoxDecoration(
+                color: Color(0xFF4F46E5), // indigo-600
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.person_add,
+                color: Colors.white,
+                size: 32,
+              ),
+            ),
             const SizedBox(height: 24),
 
+            // Title
             const Text(
-              'Welcome',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              'Create Account',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF111827), // gray-900
+              ),
             ),
             const SizedBox(height: 8),
+
+            // Subtitle
             const Text(
-              'Login using your phone number',
-              style: TextStyle(color: Color(0xFF6B7280)),
+              'Sign up to get started',
+              style: TextStyle(
+                fontSize: 16,
+                color: Color(0xFF6B7280), // gray-600
+              ),
             ),
             const SizedBox(height: 32),
 
+            // Phone Number Input
             CommonTextField(
               controller: _phoneController,
               label: 'Phone Number',
               hintText: 'Enter your phone number',
               keyboardType: TextInputType.phone,
-              validationMessage: 'Please enter phone number',
+              validationMessage: 'Please enter your phone number',
               isRequired: true,
-              enabled: !_otpSent,
             ),
-
+            const SizedBox(height: 8),
+            CommonTextField(
+              controller: _firstNameController,
+              label: 'First Name',
+              hintText: 'Enter your first name',
+              keyboardType: TextInputType.name,
+              validationMessage: 'Please enter your first name',
+              isRequired: true,
+            ),
+            const SizedBox(height: 8),
+            CommonTextField(
+              controller: _lastNameController,
+              label: 'Last Name',
+              hintText: 'Enter your last name',
+              keyboardType: TextInputType.name,
+            ),
             if (_otpSent) ...[const SizedBox(height: 16), _buildOtpFields()],
+            const SizedBox(height: 24),
 
-            const SizedBox(height: 32),
-
-            // 🔘 BUTTON
+            // Sign Up Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -166,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: _loading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        _otpSent ? 'Login' : 'Send OTP',
+                        _otpSent ? 'Sign Up' : 'Send OTP',
                         style: const TextStyle(fontSize: 16),
                       ),
               ),
@@ -174,17 +216,18 @@ class _LoginPageState extends State<LoginPage> {
 
             const SizedBox(height: 24),
 
+            // Login link
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  "Don't have an account? ",
+                  'Already have an account? ',
                   style: TextStyle(color: Color(0xFF6B7280)),
                 ),
                 GestureDetector(
-                  onTap: widget.onNavigateToSignup,
+                  onTap: widget.onNavigateToLogin,
                   child: const Text(
-                    'Sign up',
+                    'Login',
                     style: TextStyle(
                       color: Color(0xFF4F46E5),
                       decoration: TextDecoration.underline,
