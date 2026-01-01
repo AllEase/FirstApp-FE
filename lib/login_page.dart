@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'config/constants.dart';
-import 'widgets/common_text_field.dart';
+import 'config/api_urls.dart';
+import 'widgets/custom_text_field.dart';
 import 'cache_storage.dart';
 import 'api_client.dart';
+import 'user_provider.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback onNavigateToSignup;
@@ -45,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
         if (_otpSent) 'otp': _enteredOtp,
       };
       final response = await ApiClient.postWithNoToken(
-        _otpSent ? Constants.verifyOtp : Constants.sendOtp,
+        _otpSent ? ApiUrls.verifyOtp : ApiUrls.sendOtp,
         body,
       );
 
@@ -57,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
         } else {
           final token = data['token'];
           await CacheStorage.save('auth_token', token);
-          final userDetails = await ApiClient.post(Constants.getUserDetails, {
+          final userDetails = await ApiClient.post(ApiUrls.getUserDetails, {
             'userId': data['userId'],
           });
           if (userDetails.statusCode == 200 || userDetails.statusCode == 201) {
@@ -65,6 +67,10 @@ class _LoginPageState extends State<LoginPage> {
             await CacheStorage.saveObj('user_data', userData['user']);
             bool isSeller = userData['user']['is_seller'] ?? false;
             await CacheStorage.save('is_seller_mode', isSeller.toString());
+            Provider.of<UserProvider>(
+              context,
+              listen: false,
+            ).setAddresses(userData['user']['addresses']);
           }
           widget.onLogin(data['userId'].toString());
         }
@@ -134,15 +140,17 @@ class _LoginPageState extends State<LoginPage> {
               style: TextStyle(color: Color(0xFF6B7280)),
             ),
             const SizedBox(height: 32),
-
-            CommonTextField(
+            CustomTextField(
               controller: _phoneController,
               label: 'Phone Number',
-              hintText: 'Enter your phone number',
+              icon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
-              validationMessage: 'Please enter phone number',
-              isRequired: true,
-              enabled: !_otpSent,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your phone number';
+                }
+                return null;
+              },
             ),
 
             if (_otpSent) ...[const SizedBox(height: 16), _buildOtpFields()],

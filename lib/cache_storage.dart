@@ -28,16 +28,4 @@ class CacheStorage {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(key);
   }
-
-  static Future<void> debugDumpCache() async {
-    print("started");
-    final prefs = await SharedPreferences.getInstance();
-    final keys = prefs.getKeys(); // Gets all stored keys
-
-    print("--- 📱 CACHE DUMP ---");
-    for (String key in keys) {
-      print("$key: ${prefs.get(key)}");
-    }
-    print("---------------------");
-  }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'config/constants.dart';
-import 'widgets/common_text_field.dart';
+import 'config/api_urls.dart';
+import 'widgets/custom_text_field.dart';
 import 'api_client.dart';
 import 'cache_storage.dart';
 
@@ -50,7 +50,7 @@ class _SignupPageState extends State<SignupPage> {
         'signup': true,
       };
       final response = await ApiClient.postWithNoToken(
-        _otpSent ? Constants.verifyOtp : Constants.sendOtp,
+        _otpSent ? ApiUrls.verifyOtp : ApiUrls.sendOtp,
         body,
       );
 
@@ -62,7 +62,7 @@ class _SignupPageState extends State<SignupPage> {
         } else {
           final token = data['token'];
           await CacheStorage.save('auth_token', token);
-          final userDetails = await ApiClient.post(Constants.getUserDetails, {
+          final userDetails = await ApiClient.post(ApiUrls.getUserDetails, {
             'userId': data['userId'],
           });
           if (userDetails.statusCode == 200 || userDetails.statusCode == 201) {
@@ -164,29 +164,41 @@ class _SignupPageState extends State<SignupPage> {
             const SizedBox(height: 32),
 
             // Phone Number Input
-            CommonTextField(
+            CustomTextField(
               controller: _phoneController,
               label: 'Phone Number',
-              hintText: 'Enter your phone number',
+              icon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
-              validationMessage: 'Please enter your phone number',
-              isRequired: true,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your phone number';
+                }
+                return null;
+              },
             ),
             const SizedBox(height: 8),
-            CommonTextField(
+            CustomTextField(
               controller: _firstNameController,
               label: 'First Name',
-              hintText: 'Enter your first name',
-              keyboardType: TextInputType.name,
-              validationMessage: 'Please enter your first name',
-              isRequired: true,
+              icon: Icons.person_outline,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter first name';
+                }
+                return null;
+              },
             ),
             const SizedBox(height: 8),
-            CommonTextField(
+            CustomTextField(
               controller: _lastNameController,
               label: 'Last Name',
-              hintText: 'Enter your last name',
-              keyboardType: TextInputType.name,
+              icon: Icons.person_outline,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter last name';
+                }
+                return null;
+              },
             ),
             if (_otpSent) ...[const SizedBox(height: 16), _buildOtpFields()],
             const SizedBox(height: 24),

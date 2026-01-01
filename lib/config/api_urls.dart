@@ -1,6 +1,6 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class Constants {
+class ApiUrls {
   static String get baseUrl => dotenv.env['BASE_URL'] ?? '';
   static String get signup => '$baseUrl/firstApp/signup/';
   static String get login => '$baseUrl/firstApp/login/';
@@ -10,6 +10,8 @@ class Constants {
   static String get getUserDetails => '$baseUrl/firstApp/getUserDetails/';
   static String get getHomePageList => '$baseUrl/firstApp/getHomePageList/';
   static String get getOwnProducts => '$baseUrl/firstApp/getOwnProducts/';
-  static String get toggleFavorite => '$baseUrl/firstApp/toggleFavorite/';
-  static String get getWishlist => '$baseUrl/firstApp/getWishlist/';
+  static String get toggleProduct => '$baseUrl/firstApp/toggleProduct/';
+  static String get getSavedlist => '$baseUrl/firstApp/getSavedlist/';
+  static String get saveAddresses => '$baseUrl/firstApp/saveAddresses/';
+  static String get getProductDetails => '$baseUrl/firstApp/getProductDetails/';
 }

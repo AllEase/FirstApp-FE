@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
 // import 'user_provider.dart';
 import 'profile_screen.dart';
-import 'add_product_screen.dart';
+import 'add_product_screen_new.dart';
 
 class SellerDashboard extends StatelessWidget {
   const SellerDashboard({Key? key}) : super(key: key);

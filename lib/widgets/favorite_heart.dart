@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../user_provider.dart';
 import '../api_client.dart';
-import '../config/constants.dart';
+import '../config/api_urls.dart';
 
 class FavoriteHeart extends StatelessWidget {
   final String productId;
@@ -27,8 +27,9 @@ class FavoriteHeart extends StatelessWidget {
         if (onToggle != null) onToggle!();
 
         try {
-          final response = await ApiClient.post(Constants.toggleFavorite, {
+          final response = await ApiClient.post(ApiUrls.toggleProduct, {
             'productId': productId,
+            'type': "1",
             'status': !isFav,
           });
           if (response.statusCode != 200) throw Exception("API Failed");

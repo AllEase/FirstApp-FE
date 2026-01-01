@@ -1,13 +1,16 @@
 import 'dart:convert';
+import 'package:firstapp/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'profile_screen.dart';
 import 'api_client.dart';
-import 'config/constants.dart';
+import 'config/api_urls.dart';
 import 'user_provider.dart';
 import 'product_detail_screen.dart';
+import 'widgets/cache_product_image.dart';
 import 'wishlist_screen.dart';
 import 'widgets/favorite_heart.dart';
+import 'cart_screen.dart';
 
 class Product {
   final String id;
@@ -112,7 +115,7 @@ class _ShoppingHomePageState extends State<ShoppingHomePage> {
 
   Future<List<Product>> _fetchProducts({int page = 1}) async {
     try {
-      final response = await ApiClient.post(Constants.getHomePageList, {
+      final response = await ApiClient.post(ApiUrls.getHomePageList, {
         'page': page,
         'limit': _perPageLimit,
       });
@@ -126,11 +129,12 @@ class _ShoppingHomePageState extends State<ShoppingHomePage> {
             .where((item) => item['favorite'] == true)
             .map((item) => item['id'].toString())
             .toList();
+        final firstPage = page == 1 ? true : false;
 
         Provider.of<UserProvider>(
           context,
           listen: false,
-        ).setInitialFavorites(favoriteIdsFromApi);
+        ).setInitialFavorites(favoriteIdsFromApi, isFirstPage: firstPage);
 
         if (productData.length < _perPageLimit) {
           _isLastPage = true;
@@ -148,9 +152,10 @@ class _ShoppingHomePageState extends State<ShoppingHomePage> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final bool isSellerMode = userProvider.isSellerMode;
+    int cartCount = userProvider.cartIds.length;
     final Color primaryColor = isSellerMode
-        ? const Color(0xFF0F766E)
-        : const Color(0xFF4F46E5);
+        ? AppColors.sellerAppColor
+        : AppColors.userAppColor;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
@@ -159,7 +164,7 @@ class _ShoppingHomePageState extends State<ShoppingHomePage> {
         color: primaryColor,
         child: Column(
           children: [
-            _buildHeader(context, primaryColor, isSellerMode),
+            _buildHeader(context, primaryColor, isSellerMode, cartCount),
             Expanded(
               child: _isLoadingInitial
                   ? Center(
@@ -202,6 +207,7 @@ class _ShoppingHomePageState extends State<ShoppingHomePage> {
     BuildContext context,
     Color primaryColor,
     bool isSellerMode,
+    int cartCount,
   ) {
     return Container(
       color: Colors.white,
@@ -255,9 +261,55 @@ class _ShoppingHomePageState extends State<ShoppingHomePage> {
                     ),
                   ),
                   if (!isSellerMode)
-                    IconButton(
-                      icon: const Icon(Icons.shopping_cart_outlined),
-                      onPressed: () {},
+                    Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.shopping_cart_outlined),
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const CartScreen(),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          right: 4,
+                          top: 4,
+                          child: Consumer<UserProvider>(
+                            builder: (context, provider, child) {
+                              if (cartCount == 0) {
+                                return const SizedBox.shrink();
+                              }
+                              return Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 18,
+                                  minHeight: 18,
+                                ),
+                                child: Text(
+                                  '$cartCount',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                 ],
               ),
@@ -385,9 +437,6 @@ class _ProductCard extends StatelessWidget {
           builder: (context) => ProductDetailScreen(
             productId: product.id,
             productName: product.name,
-            price: product.price,
-            image: product.image,
-            category: product.category,
           ),
         ),
       ),
@@ -405,21 +454,11 @@ class _ProductCard extends StatelessWidget {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(12),
-                      ),
-                      child: Image.network(
-                        product.image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stack) => Container(
-                          color: Colors.grey[100],
-                          child: const Icon(
-                            Icons.broken_image,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
+                    child: CachedProductImage(
+                      imageUrl: product.image,
+                      width: 80.0,
+                      height: 80.0,
+                      borderRadius: 12,
                     ),
                   ),
                   // Use the common FavoriteHeart widget here

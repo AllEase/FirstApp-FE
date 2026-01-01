@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,6 +9,8 @@ class UserProvider extends ChangeNotifier {
   bool _isSellerMode = false;
   String _userName = '';
   Set<String> _favoriteIds = {};
+  Set<String> _cartIds = {};
+  List<Map<String, dynamic>> _addresses = [];
 
   // Getters
   bool get isInitialized => _isInitialized;
@@ -14,6 +18,8 @@ class UserProvider extends ChangeNotifier {
   bool get isSellerMode => _isSellerMode;
   String get userName => _userName;
   Set<String> get favoriteIds => _favoriteIds;
+  Set<String> get cartIds => _cartIds;
+  List<Map<String, dynamic>> get addresses => _addresses;
 
   /// Loads saved state from local storage on app startup
   Future<void> init() async {
@@ -21,22 +27,60 @@ class UserProvider extends ChangeNotifier {
     _isSellerMode = prefs.getBool('isSellerMode') ?? false;
     _isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
     _userName = prefs.getString('userName') ?? '';
+    _favoriteIds = (prefs.getStringList('favoriteIds') ?? []).toSet();
+    _cartIds = (prefs.getStringList('cartIds') ?? []).toSet();
+    String? savedAddressJson = prefs.getString('addresses');
+    if (savedAddressJson != null && savedAddressJson.isNotEmpty) {
+      try {
+        final List<dynamic> decodedList = jsonDecode(savedAddressJson);
+        _addresses = List<Map<String, dynamic>>.from(decodedList);
+      } catch (e) {
+        _addresses = [];
+      }
+    } else {
+      _addresses = [];
+    }
 
     _isInitialized = true;
     notifyListeners();
   }
 
-  void setInitialFavorites(List<String> ids) {
-    _favoriteIds = ids.toSet();
+  void setInitialFavorites(List<String> ids, {bool isFirstPage = false}) async {
+    if (isFirstPage) {
+      _favoriteIds.clear();
+    }
+    _favoriteIds.addAll(ids);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('favoriteIds', _favoriteIds.toList());
     notifyListeners();
   }
 
-  void toggleFavoriteLocally(String productId, bool isFav) {
+  void setInitialCart(List<String> ids) async {
+    _cartIds = ids.toSet();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('cartIds', _cartIds.toList());
+    notifyListeners();
+  }
+
+  void toggleFavoriteLocally(String productId, bool isFav) async {
     if (isFav) {
       _favoriteIds.add(productId);
     } else {
       _favoriteIds.remove(productId);
     }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('favoriteIds', _favoriteIds.toList());
+    notifyListeners();
+  }
+
+  void toggleCartLocally(String productId, bool add) async {
+    if (add) {
+      _cartIds.add(productId);
+    } else {
+      _cartIds.remove(productId);
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('cartIds', _cartIds.toList());
     notifyListeners();
   }
 
@@ -44,7 +88,45 @@ class UserProvider extends ChangeNotifier {
     return _favoriteIds.contains(productId);
   }
 
-  /// Handles Login and Signup success
+  bool isProductInCart(String productId) {
+    return _cartIds.contains(productId);
+  }
+
+  Future<void> setAddresses(List<dynamic> newAddresses) async {
+    _addresses = List<Map<String, dynamic>>.from(newAddresses);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('addresses', jsonEncode(_addresses));
+    notifyListeners();
+  }
+
+  Future<void> addAddress(Map<String, dynamic> newAddress) async {
+    _addresses.add(newAddress);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('addresses', jsonEncode(_addresses));
+    notifyListeners();
+  }
+
+  Future<void> updateAddress(
+    int index,
+    Map<String, dynamic> updatedAddress,
+  ) async {
+    if (index >= 0 && index < _addresses.length) {
+      _addresses[index] = updatedAddress;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('addresses', jsonEncode(_addresses));
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeAddress(int index) async {
+    if (index >= 0 && index < _addresses.length) {
+      _addresses.removeAt(index);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('addresses', jsonEncode(_addresses));
+      notifyListeners();
+    }
+  }
+
   Future<void> setAuthenticated(bool status, String name) async {
     _isAuthenticated = status;
     _userName = name;

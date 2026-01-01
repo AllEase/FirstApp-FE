@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'widgets/cache_product_image.dart';
 import 'package:flutter/material.dart';
 import 'cache_storage.dart';
 import 'api_client.dart';
-import 'config/constants.dart';
+import 'config/api_urls.dart';
 
 class ManageProductsScreen extends StatefulWidget {
   const ManageProductsScreen({Key? key}) : super(key: key);
@@ -26,7 +27,8 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
     _fetchOwnProducts(isFirstLoad: true);
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent * 0.9) {
         if (!_isLoadingMore && !_isLastPage) {
           _fetchOwnProducts();
         }
@@ -51,7 +53,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
       final userId = userData?['userId'] ?? '';
 
       // API Call to get products listed by THIS user
-      final response = await ApiClient.post(Constants.getOwnProducts, {
+      final response = await ApiClient.post(ApiUrls.getOwnProducts, {
         'userId': userId,
         'page': _currentPage,
         'limit': _limit,
@@ -91,19 +93,20 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
         child: _isLoadingInitial
             ? const Center(child: CircularProgressIndicator())
             : _myProducts.isEmpty
-                ? _buildEmptyState()
-                : ListView.separated(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _myProducts.length + (_isLoadingMore ? 1 : 0),
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      if (index == _myProducts.length) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      return _buildProductListItem(_myProducts[index]);
-                    },
-                  ),
+            ? _buildEmptyState()
+            : ListView.separated(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: _myProducts.length + (_isLoadingMore ? 1 : 0),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  if (index == _myProducts.length) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  return _buildProductListItem(_myProducts[index]);
+                },
+              ),
       ),
     );
   }
@@ -114,20 +117,17 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5),
+        ],
       ),
       child: Row(
         children: [
           // Product Thumbnail
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              product['thumbnail'] ?? '',
-              width: 70,
-              height: 70,
-              fit: BoxFit.cover,
-              errorBuilder: (context, e, s) => const Icon(Icons.image_not_supported, size: 40),
-            ),
+          CachedProductImage(
+            imageUrl: product['thumbnail'] ?? '',
+            width: 80.0,
+            height: 80.0,
           ),
           const SizedBox(width: 12),
           // Info
@@ -137,13 +137,19 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
               children: [
                 Text(
                   product['name'] ?? 'Untitled',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   '\$${product['price']}',
-                  style: const TextStyle(color: Color(0xFF0F766E), fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    color: Color(0xFF0F766E),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -177,7 +183,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
           TextButton(
             onPressed: () => _fetchOwnProducts(isFirstLoad: true),
             child: const Text("Refresh"),
-          )
+          ),
         ],
       ),
     );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'user_provider.dart';
 import 'main.dart';
+import 'address_list_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -190,7 +191,14 @@ class ProfileScreen extends StatelessWidget {
                   _buildSettingsTile(
                     icon: Icons.location_on_outlined,
                     title: 'Addresses',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AddressListScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const Divider(height: 1),
                   _buildSettingsTile(

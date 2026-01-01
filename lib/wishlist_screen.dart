@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'api_client.dart';
-import 'config/constants.dart';
+import 'config/api_urls.dart';
 import 'product_detail_screen.dart';
 import 'user_provider.dart';
-import 'widgets/favorite_heart.dart'; // Ensure this path matches your project structure
+import 'widgets/favorite_heart.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({Key? key}) : super(key: key);
@@ -58,9 +58,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
     }
 
     try {
-      final response = await ApiClient.post(Constants.getWishlist, {
+      final response = await ApiClient.post(ApiUrls.getSavedlist, {
         'page': _currentPage,
         'limit': _limit,
+        'type': '1'
       });
 
       if (response.statusCode == 200) {
@@ -144,10 +145,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
         MaterialPageRoute(
           builder: (context) => ProductDetailScreen(
             productId: productId,
-            productName: item['name'],
-            price: (item['price'] as num).toDouble(),
-            image: item['thumbnail'] ?? '',
-            category: item['category'] ?? 'General',
+            productName: item['name']
           ),
         ),
       ),
