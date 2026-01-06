@@ -1,35 +1,37 @@
-import 'package:firstapp/cache_storage.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'user_provider.dart';
+import 'package:flutter/material.dart';
+import 'providers/user_provider.dart';
+import 'providers/locale_provider.dart';
 import 'main.dart';
-import 'address_list_screen.dart';
+import 'screens/user/address_list_screen.dart';
+import '../../localization/app_localizations.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
-  static Future<String> getUserName() async {
-    final userData = await CacheStorage.getObj("user_data");
-    if (userData != null && userData['firstName'] != null) {
-      return userData['firstName'];
+  static Future<String> getUserName(UserProvider userProvider) async {
+    final name = userProvider.user?.firstName;
+    if (name == null || name.trim().isEmpty) {
+      return 'Demo User';
     }
-    return 'Demo User';
+    return name;
   }
 
-  static Future<String> getUserNumber() async {
-    final userData = await CacheStorage.getObj("user_data");
-    if (userData != null && userData['number'] != null) {
-      return userData['number'];
+  static Future<String> getUserNumber(UserProvider userProvider) async {
+    final number = userProvider.user?.number;
+    if (number == null || number.trim().isEmpty) {
+      return '';
     }
-    return '';
+    return number;
   }
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(context.loc("profile")),
         backgroundColor: const Color(0xFF4F46E5),
         foregroundColor: Colors.white,
         elevation: 0,
@@ -60,13 +62,13 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   FutureBuilder<String>(
-                    future: getUserName(),
+                    future: getUserName(userProvider),
                     builder: (context, snapshot) {
                       String nameToShow = '...';
                       if (snapshot.hasData) {
                         nameToShow = snapshot.data!;
                       } else if (snapshot.hasError) {
-                        nameToShow = 'Error';
+                        nameToShow = context.loc("error");
                       }
                       return Text(
                         nameToShow,
@@ -80,7 +82,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   FutureBuilder<String>(
-                    future: getUserNumber(),
+                    future: getUserNumber(userProvider),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData || snapshot.data!.isEmpty) {
                         return const SizedBox.shrink();
@@ -178,7 +180,7 @@ class ProfileScreen extends StatelessWidget {
                   // Other Settings Options
                   _buildSettingsTile(
                     icon: Icons.shopping_bag_outlined,
-                    title: 'My Orders',
+                    title: context.loc("my_orders"),
                     onTap: () {},
                   ),
                   const Divider(height: 1),
@@ -228,7 +230,7 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   _buildSettingsTile(
                     icon: Icons.settings_outlined,
-                    title: 'Settings',
+                    title: context.loc("settings"),
                     onTap: () {},
                   ),
                   const Divider(height: 1),
@@ -240,13 +242,19 @@ class ProfileScreen extends StatelessWidget {
                   const Divider(height: 1),
                   _buildSettingsTile(
                     icon: Icons.info_outline,
+                    title: context.loc('language'),
+                    onTap: () => _showLanguagePicker(context),
+                  ),
+                  const Divider(height: 1),
+                  _buildSettingsTile(
+                    icon: Icons.info_outline,
                     title: 'About',
                     onTap: () {},
                   ),
                   const Divider(height: 1),
                   _buildSettingsTile(
                     icon: Icons.logout,
-                    title: 'Logout',
+                    title: context.loc("logout"),
                     onTap: () {
                       final userProvider = Provider.of<UserProvider>(
                         context,
@@ -262,7 +270,7 @@ class ProfileScreen extends StatelessWidget {
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: const Text('Cancel'),
+                              child: Text(context.loc("cancel")),
                             ),
                             TextButton(
                               onPressed: () {
@@ -274,8 +282,8 @@ class ProfileScreen extends StatelessWidget {
                                   (Route<dynamic> route) => false,
                                 );
                               },
-                              child: const Text(
-                                'Logout',
+                              child: Text(
+                                context.loc("logout"),
                                 style: TextStyle(color: Colors.red),
                               ),
                             ),
@@ -312,6 +320,74 @@ class ProfileScreen extends StatelessWidget {
       ),
       trailing: const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
       onTap: onTap,
+    );
+  }
+
+  void _showLanguagePicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        final localeProvider = Provider.of<LocaleProvider>(
+          context,
+          listen: false,
+        );
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                context.loc("language"),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Divider(),
+              _languageTile(
+                context,
+                'English',
+                const Locale('en'),
+                localeProvider,
+              ),
+              _languageTile(
+                context,
+                'हिंदी (Hindi)',
+                const Locale('hi'),
+                localeProvider,
+              ),
+              _languageTile(
+                context,
+                'తెలుగు (Telugu)',
+                const Locale('te'),
+                localeProvider,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _languageTile(
+    BuildContext context,
+    String label,
+    Locale locale,
+    LocaleProvider provider,
+  ) {
+    return ListTile(
+      title: Text(label),
+      trailing: provider.locale.languageCode == locale.languageCode
+          ? const Icon(Icons.check, color: Colors.indigo)
+          : null,
+      onTap: () {
+        provider.setLocale(locale);
+        Navigator.pop(context); // Close the bottom sheet
+      },
     );
   }
 }

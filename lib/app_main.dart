@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'user_provider.dart';
-import 'shopping_home_page.dart';
-import 'seller_dashboard.dart';
+import 'providers/user_provider.dart';
+import 'screens/user/shopping_home_page.dart';
+import 'screens/seller/seller_dashboard.dart';
 
 /// Main app entry point with Provider integration
 class AppMain extends StatelessWidget {

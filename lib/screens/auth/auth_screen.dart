@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'user_provider.dart';
-import 'login_page.dart';
-import 'signup_page.dart';
+import '../../providers/user_provider.dart';
+import 'login_screen.dart';
+import 'signup_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -41,15 +41,15 @@ class _AuthScreenState extends State<AuthScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: isLoginPage
-                ? LoginPage(
+                ? LoginScreen(
                     onNavigateToSignup: togglePage,
                     // When the API login succeeds, update the Provider
-                    onLogin: (name) => userProvider.setAuthenticated(true, name),
+                    onLogin: (name) => userProvider.setAuthenticated(true),
                   )
-                : SignupPage(
+                : SignupScreen(
                     onNavigateToLogin: togglePage,
                     // When the API signup succeeds, update the Provider
-                    onSignup: (name) => userProvider.setAuthenticated(true, name),
+                    onSignup: (name) => userProvider.setAuthenticated(true),
                   ),
           ),
         ),

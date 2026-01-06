@@ -1,15 +1,15 @@
 import 'dart:convert';
-import 'package:firstapp/config/app_colors.dart';
+import '/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'profile_screen.dart';
-import 'api_client.dart';
-import 'config/api_urls.dart';
-import 'user_provider.dart';
+import '../../profile_screen.dart';
+import '../../api_client.dart';
+import '../../config/api_urls.dart';
+import '../../providers/user_provider.dart';
 import 'product_detail_screen.dart';
-import 'widgets/cache_product_image.dart';
+import '../../widgets/cache_product_image.dart';
 import 'wishlist_screen.dart';
-import 'widgets/favorite_heart.dart';
+import '../../widgets/favorite_heart.dart';
 import 'cart_screen.dart';
 
 class Product {

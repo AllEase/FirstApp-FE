@@ -1,9 +1,11 @@
 import 'dart:convert';
-import 'widgets/cache_product_image.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'cache_storage.dart';
-import 'api_client.dart';
-import 'config/api_urls.dart';
+
+import '../../widgets/cache_product_image.dart';
+import '../../api_client.dart';
+import '../../config/api_urls.dart';
+import '../../providers/user_provider.dart';
 
 class ManageProductsScreen extends StatefulWidget {
   const ManageProductsScreen({Key? key}) : super(key: key);
@@ -49,8 +51,8 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
     }
 
     try {
-      final userData = await CacheStorage.getObj('user_data');
-      final userId = userData?['userId'] ?? '';
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userId = userProvider.user!.userId;
 
       // API Call to get products listed by THIS user
       final response = await ApiClient.post(ApiUrls.getOwnProducts, {
@@ -85,7 +87,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manage My Products'),
-        backgroundColor: const Color(0xFF0F766E), // Seller Mode Teal
+        backgroundColor: const Color(0xFF0F766E),
         foregroundColor: Colors.white,
       ),
       body: RefreshIndicator(

@@ -6,8 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
-import 'config/api_urls.dart';
-import 'api_client.dart';
+import '../../config/api_urls.dart';
+import '../../api_client.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({Key? key}) : super(key: key);

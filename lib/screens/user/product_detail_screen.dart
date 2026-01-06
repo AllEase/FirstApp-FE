@@ -358,11 +358,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
-import 'user_provider.dart';
-import 'api_client.dart';
-import 'config/api_urls.dart';
-import 'widgets/cache_product_image.dart';
-import 'widgets/favorite_heart.dart';
+import '../../providers/user_provider.dart';
+import '../../api_client.dart';
+import '../../config/api_urls.dart';
+import '../../widgets/cache_product_image.dart';
+import '../../widgets/favorite_heart.dart';
 import 'checkout_screen.dart';
 
 class ProductDetailScreen extends StatefulWidget {

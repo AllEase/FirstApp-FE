@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../user_provider.dart';
+import '../../providers/user_provider.dart';
 import 'add_address_screen.dart';
-import 'api_client.dart';
-import 'config/api_urls.dart';
+import '../../api_client.dart';
+import '../../config/api_urls.dart';
 import 'dart:convert';
 
 class AddressListScreen extends StatelessWidget {

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'user_provider.dart';
+import '../../providers/user_provider.dart';
 import 'checkout_screen.dart';
-import 'api_client.dart';
-import 'config/api_urls.dart';
+import '../../api_client.dart';
+import '../../config/api_urls.dart';
 import 'dart:convert';
-import 'config/app_colors.dart';
-import 'widgets/cache_product_image.dart';
+import '../../config/app_colors.dart';
+import '../../widgets/cache_product_image.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({Key? key}) : super(key: key);

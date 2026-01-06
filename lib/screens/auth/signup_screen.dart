@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'config/api_urls.dart';
-import 'widgets/custom_text_field.dart';
-import 'api_client.dart';
-import 'cache_storage.dart';
+import 'package:provider/provider.dart';
 
-class SignupPage extends StatefulWidget {
+import '../../widgets/custom_text_field.dart';
+import '../../providers/user_provider.dart';
+import '../../localization/app_localizations.dart';
+
+class SignupScreen extends StatefulWidget {
   final VoidCallback onNavigateToLogin;
   final Function(String) onSignup;
 
-  const SignupPage({
+  const SignupScreen({
     Key? key,
     required this.onNavigateToLogin,
     required this.onSignup,
   }) : super(key: key);
 
   @override
-  State<SignupPage> createState() => _SignupPageState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupPageState extends State<SignupPage> {
+class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -31,64 +31,38 @@ class _SignupPageState extends State<SignupPage> {
 
   final List<FocusNode> _otpFocusNodes = List.generate(6, (_) => FocusNode());
 
-  bool _otpSent = false; // 🔥 state switch
+  bool _otpSent = false;
   bool _loading = false;
 
   String get _enteredOtp => _otpControllers.map((c) => c.text).join();
 
   Future<void> _handleAction() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _loading = true);
-
-    try {
-      final body = {
-        'number': _phoneController.text,
-        'firstName': _firstNameController.text,
-        'lastName': _lastNameController.text,
-        if (_otpSent) 'otp': _enteredOtp,
-        'signup': true,
-      };
-      final response = await ApiClient.postWithNoToken(
-        _otpSent ? ApiUrls.verifyOtp : ApiUrls.sendOtp,
-        body,
-      );
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (!_otpSent) {
-          setState(() => _otpSent = true);
-        } else {
-          final token = data['token'];
-          await CacheStorage.save('auth_token', token);
-          final userDetails = await ApiClient.post(ApiUrls.getUserDetails, {
-            'userId': data['userId'],
-          });
-          if (userDetails.statusCode == 200 || userDetails.statusCode == 201) {
-            final userData = jsonDecode(userDetails.body);
-            await CacheStorage.saveObj('user_data', userData['user']);
-          }
-          widget.onSignup(data['userId'].toString());
-        }
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    bool success = await userProvider.signUp(
+      _phoneController.text,
+      _firstNameController.text,
+      _lastNameController.text,
+      _enteredOtp,
+      _otpSent,
+    );
+    if (!mounted) return;
+    if (success) {
+      if (!_otpSent) {
+        setState(() => _otpSent = true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['error'] ?? 'Signup failed')),
-        );
+        widget.onSignup(userProvider.user!.userId.toString());
       }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Network error')));
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text('Error: ${e.toString()}'),
-      //   ),
-      // );
-    } finally {
-      if (mounted) setState(() => _loading = false);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(userProvider.error),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
+    setState(() => _loading = false);
   }
 
   @override
@@ -143,8 +117,8 @@ class _SignupPageState extends State<SignupPage> {
             const SizedBox(height: 24),
 
             // Title
-            const Text(
-              'Create Account',
+            Text(
+              context.loc("create_account"),
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -154,8 +128,8 @@ class _SignupPageState extends State<SignupPage> {
             const SizedBox(height: 8),
 
             // Subtitle
-            const Text(
-              'Sign up to get started',
+            Text(
+              context.loc('signup_started'),
               style: TextStyle(
                 fontSize: 16,
                 color: Color(0xFF6B7280), // gray-600
@@ -166,12 +140,12 @@ class _SignupPageState extends State<SignupPage> {
             // Phone Number Input
             CustomTextField(
               controller: _phoneController,
-              label: 'Phone Number',
+              label: context.loc('phone_number'),
               icon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your phone number';
+                  return context.loc('phone_error');
                 }
                 return null;
               },
@@ -179,11 +153,11 @@ class _SignupPageState extends State<SignupPage> {
             const SizedBox(height: 8),
             CustomTextField(
               controller: _firstNameController,
-              label: 'First Name',
+              label: context.loc('first_name'),
               icon: Icons.person_outline,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter first name';
+                  return context.loc('error_first_name');
                 }
                 return null;
               },
@@ -191,11 +165,11 @@ class _SignupPageState extends State<SignupPage> {
             const SizedBox(height: 8),
             CustomTextField(
               controller: _lastNameController,
-              label: 'Last Name',
+              label: context.loc('last_name'),
               icon: Icons.person_outline,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter last name';
+                  return context.loc('error_last_name');
                 }
                 return null;
               },
@@ -220,7 +194,7 @@ class _SignupPageState extends State<SignupPage> {
                 child: _loading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        _otpSent ? 'Sign Up' : 'Send OTP',
+                        _otpSent ? context.loc('sign_up') : context.loc('send_otp'),
                         style: const TextStyle(fontSize: 16),
                       ),
               ),
@@ -232,14 +206,14 @@ class _SignupPageState extends State<SignupPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  'Already have an account? ',
+                Text(
+                  context.loc('already_have_account'),
                   style: TextStyle(color: Color(0xFF6B7280)),
                 ),
                 GestureDetector(
                   onTap: widget.onNavigateToLogin,
-                  child: const Text(
-                    'Login',
+                  child: Text(
+                    context.loc('login'),
                     style: TextStyle(
                       color: Color(0xFF4F46E5),
                       decoration: TextDecoration.underline,
@@ -258,8 +232,8 @@ class _SignupPageState extends State<SignupPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Enter OTP',
+        Text(
+          context.loc('enter_otp'),
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,

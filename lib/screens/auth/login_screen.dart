@@ -1,27 +1,25 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'config/api_urls.dart';
-import 'widgets/custom_text_field.dart';
-import 'cache_storage.dart';
-import 'api_client.dart';
-import 'user_provider.dart';
+import '../../widgets/custom_text_field.dart';
+import '../../providers/user_provider.dart';
 import 'package:provider/provider.dart';
 
-class LoginPage extends StatefulWidget {
+import '../../localization/app_localizations.dart';
+
+class LoginScreen extends StatefulWidget {
   final VoidCallback onNavigateToSignup;
   final Function(String) onLogin;
 
-  const LoginPage({
+  const LoginScreen({
     Key? key,
     required this.onNavigateToSignup,
     required this.onLogin,
   }) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
   final List<TextEditingController> _otpControllers = List.generate(
@@ -31,66 +29,32 @@ class _LoginPageState extends State<LoginPage> {
 
   final List<FocusNode> _otpFocusNodes = List.generate(6, (_) => FocusNode());
 
-  bool _otpSent = false; // 🔥 state switch
+  bool _otpSent = false;
   bool _loading = false;
 
   String get _enteredOtp => _otpControllers.map((c) => c.text).join();
 
   Future<void> _handleAction() async {
     if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _loading = true);
-
-    try {
-      final body = {
-        'number': _phoneController.text,
-        if (_otpSent) 'otp': _enteredOtp,
-      };
-      final response = await ApiClient.postWithNoToken(
-        _otpSent ? ApiUrls.verifyOtp : ApiUrls.sendOtp,
-        body,
-      );
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (!_otpSent) {
-          setState(() => _otpSent = true);
-        } else {
-          final token = data['token'];
-          await CacheStorage.save('auth_token', token);
-          final userDetails = await ApiClient.post(ApiUrls.getUserDetails, {
-            'userId': data['userId'],
-          });
-          if (userDetails.statusCode == 200 || userDetails.statusCode == 201) {
-            final userData = jsonDecode(userDetails.body);
-            await CacheStorage.saveObj('user_data', userData['user']);
-            bool isSeller = userData['user']['is_seller'] ?? false;
-            await CacheStorage.save('is_seller_mode', isSeller.toString());
-            Provider.of<UserProvider>(
-              context,
-              listen: false,
-            ).setAddresses(userData['user']['addresses']);
-          }
-          widget.onLogin(data['userId'].toString());
-        }
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    bool success = await userProvider.login(
+      _phoneController.text,
+      _enteredOtp,
+      _otpSent,
+    );
+    if (success) {
+      if (!_otpSent) {
+        setState(() => _otpSent = true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['error'] ?? 'Something went wrong')),
-        );
+        widget.onLogin(userProvider.user!.userId.toString());
       }
-    } catch (e) {
-      if (!mounted) return;
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Error: ${e.toString()}',
-          ), // This shows the exact error message
+          content: Text(userProvider.error),
           backgroundColor: Colors.red,
         ),
       );
-    } finally {
-      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -130,24 +94,24 @@ class _LoginPageState extends State<LoginPage> {
             const Icon(Icons.login, size: 48, color: Color(0xFF4F46E5)),
             const SizedBox(height: 24),
 
-            const Text(
-              'Welcome',
+            Text(
+              context.loc('welcome'),
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Login using your phone number',
+            Text(
+              context.loc('login_instruction'),
               style: TextStyle(color: Color(0xFF6B7280)),
             ),
             const SizedBox(height: 32),
             CustomTextField(
               controller: _phoneController,
-              label: 'Phone Number',
+              label: context.loc('phone_number'),
               icon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your phone number';
+                  return context.loc('phone_error');
                 }
                 return null;
               },
@@ -174,7 +138,9 @@ class _LoginPageState extends State<LoginPage> {
                 child: _loading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        _otpSent ? 'Login' : 'Send OTP',
+                        _otpSent
+                            ? context.loc('login')
+                            : context.loc('send_otp'),
                         style: const TextStyle(fontSize: 16),
                       ),
               ),
@@ -185,14 +151,14 @@ class _LoginPageState extends State<LoginPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  "Don't have an account? ",
+                Text(
+                  context.loc('no_account'),
                   style: TextStyle(color: Color(0xFF6B7280)),
                 ),
                 GestureDetector(
                   onTap: widget.onNavigateToSignup,
-                  child: const Text(
-                    'Sign up',
+                  child: Text(
+                    context.loc('sign_up'),
                     style: TextStyle(
                       color: Color(0xFF4F46E5),
                       decoration: TextDecoration.underline,
@@ -211,8 +177,8 @@ class _LoginPageState extends State<LoginPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Enter OTP',
+        Text(
+          context.loc('enter_otp'),
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,

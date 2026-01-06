@@ -1,9 +1,9 @@
-import 'package:firstapp/config/app_colors.dart';
+import '/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'user_provider.dart';
-import 'widgets/custom_text_field.dart';
-import 'widgets/shipping_address.dart';
+import '../../providers/user_provider.dart';
+import '../../widgets/custom_text_field.dart';
+import '../../widgets/shipping_address.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final dynamic singleItem;

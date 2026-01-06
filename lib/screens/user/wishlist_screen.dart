@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'api_client.dart';
-import 'config/api_urls.dart';
+import '../../api_client.dart';
+import '../../config/api_urls.dart';
 import 'product_detail_screen.dart';
-import 'user_provider.dart';
-import 'widgets/favorite_heart.dart';
+import '../../providers/user_provider.dart';
+import '../../widgets/favorite_heart.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({Key? key}) : super(key: key);
