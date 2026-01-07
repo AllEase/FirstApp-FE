@@ -21,6 +21,7 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   shimmer: ^3.0.0
+  lottie: ^3.1.0
 
 dev_dependencies:
   flutter_test:
@@ -34,6 +35,7 @@ flutter:
     - .env
     - assets/
     - assets/languages/
+    - assets/animations/
   # fonts:
   #   - family: Segoe UI
   #     fonts:

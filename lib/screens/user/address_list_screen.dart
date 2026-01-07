@@ -11,15 +11,17 @@ class AddressListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color sellerColor = const Color(0xFF0D9488);
+    final userProvider = Provider.of<UserProvider>(context);
+    final Color primaryColor = userProvider.primaryColor;
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Addresses'),
-        backgroundColor: sellerColor,
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
       ),
       body: Consumer<UserProvider>(
         builder: (context, provider, child) {
-          if (provider.addresses.isEmpty){
+          if (provider.addresses.isEmpty) {
             return const Center(child: Text('No addresses saved.'));
           }
           return ListView.builder(
@@ -37,7 +39,7 @@ class AddressListScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.edit, color: sellerColor),
+                        icon: Icon(Icons.edit, color: primaryColor),
                         onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -96,7 +98,7 @@ class AddressListScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: sellerColor,
+        backgroundColor: primaryColor,
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const AddAddressScreen()),

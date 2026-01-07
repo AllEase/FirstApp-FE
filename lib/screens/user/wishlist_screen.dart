@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vora/config/app_colors.dart';
 import '../../api_client.dart';
 import '../../config/api_urls.dart';
 import 'product_detail_screen.dart';
@@ -90,9 +91,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     // Access theme based on persistent Seller Mode
     final userProvider = Provider.of<UserProvider>(context);
     final bool isSellerMode = userProvider.isSellerMode;
-    final Color primaryColor = isSellerMode
-        ? const Color(0xFF0F766E)
-        : const Color(0xFF4F46E5);
+    final Color primaryColor = userProvider.primaryColor;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),

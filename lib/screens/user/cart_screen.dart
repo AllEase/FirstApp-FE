@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
-import 'checkout_screen.dart';
 import '../../api_client.dart';
 import '../../config/api_urls.dart';
 import 'dart:convert';
-import '../../config/app_colors.dart';
 import '../../widgets/cache_product_image.dart';
 
 class CartScreen extends StatefulWidget {
@@ -89,9 +87,7 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    final Color primaryColor = userProvider.isSellerMode
-        ? AppColors.sellerAppColor
-        : AppColors.userAppColor;
+    final Color primaryColor = userProvider.primaryColor;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),

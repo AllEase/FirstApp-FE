@@ -153,9 +153,7 @@ class _ShoppingHomePageState extends State<ShoppingHomePage> {
     final userProvider = Provider.of<UserProvider>(context);
     final bool isSellerMode = userProvider.isSellerMode;
     int cartCount = userProvider.cartIds.length;
-    final Color primaryColor = isSellerMode
-        ? AppColors.sellerAppColor
-        : AppColors.userAppColor;
+    final Color primaryColor = userProvider.primaryColor;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),

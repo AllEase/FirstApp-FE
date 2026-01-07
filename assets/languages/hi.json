@@ -49,5 +49,20 @@
     "signup_started": "शुरू करने के लिए साइन अप करें",
     "error_first_name": "कृपया पहला नाम दर्ज करें",
     "error_last_name": "कृपया अंतिम नाम दर्ज करें",
-    "already_have_account": "क्या आपके पास पहले से ही एक खाता है? "
+    "already_have_account": "क्या आपके पास पहले से ही एक खाता है? ",
+    "demo_user": "डेमो यूजर",
+    "in_seller_mode": "आप सेलर मोड में हैं",
+    "manage_your_products": "अपने उत्पादों को प्रबंधित करने के लिए बदलें",
+    "seller_mode_activated": "सेलर मोड सक्रिय हो गया",
+    "seller_mode_deactivated": "सेलर मोड निष्क्रिय हो गया",
+    "wishlist": "విష్‌లిస్ట్ (विशलिस्ट)",
+    "addresses": "पते",
+    "payment_methods": "भुगतान के तरीके",
+    "help_and_support": "सहायता और समर्थन",
+    "about": "विवरण / के बारे में",
+    "sure_logout": "क्या आप वाकई लॉग आउट करना चाहते हैं?",
+    "sent_to": "इस पर भेजा गया",
+    "resend_otp": "ओटीपी पुनः भेजें",
+    "resend_in": "पुनः भेजें",
+    "change_number": "नंबर बदलें"
 }

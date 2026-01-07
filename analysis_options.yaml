@@ -15,6 +15,7 @@ analyzer:
     sized_box_for_whitespace: ignore
     prefer_final_fields: ignore
     avoid_function_literals_in_foreach_calls: ignore
+    curly_braces_in_flow_control_structures: ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:

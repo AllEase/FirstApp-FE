@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
+import 'package:vora/animated_background.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -22,37 +23,51 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // We use listen: false because we just want to call the login/signup methods
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFEFF6FF), // Light Blue
-              Color(0xFFE0E7FF), // Light Indigo
-            ],
+      body: Stack(
+        children: [
+          // 🔹 Animated Background (fixed)
+          const AnimatedBackground(),
+
+          // 🔹 Foreground Content
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.05),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: isLoginPage
+                      ? LoginScreen(
+                          key: const ValueKey('login'),
+                          onNavigateToSignup: togglePage,
+                          onLogin: (name) =>
+                              userProvider.setAuthenticated(true),
+                        )
+                      : SignupScreen(
+                          key: const ValueKey('signup'),
+                          onNavigateToLogin: togglePage,
+                          onSignup: (name) =>
+                              userProvider.setAuthenticated(true),
+                        ),
+                ),
+              ),
+            ),
           ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: isLoginPage
-                ? LoginScreen(
-                    onNavigateToSignup: togglePage,
-                    // When the API login succeeds, update the Provider
-                    onLogin: (name) => userProvider.setAuthenticated(true),
-                  )
-                : SignupScreen(
-                    onNavigateToLogin: togglePage,
-                    // When the API signup succeeds, update the Provider
-                    onSignup: (name) => userProvider.setAuthenticated(true),
-                  ),
-          ),
-        ),
+        ],
       ),
     );
   }

@@ -49,5 +49,20 @@
     "signup_started": "ప్రారంభించడానికి సైన్ అప్ చేయండి",
     "error_first_name": "దయచేసి మొదటి పేరును నమోదు చేయండి",
     "error_last_name": "దయచేసి చివరి పేరును నమోదు చేయండి",
-    "already_have_account": "ఇప్పటికే ఖాతా ఉందా? "
+    "already_have_account": "ఇప్పటికే ఖాతా ఉందా? ",
+    "demo_user": "డెమో యూజర్",
+    "in_seller_mode": "మీరు సెల్లర్ మోడ్‌లో ఉన్నారు",
+    "manage_your_products": "మీ ఉత్పత్తులను నిర్వహించడానికి మారండి",
+    "seller_mode_activated": "సెల్లర్ మోడ్ యాక్టివేట్ చేయబడింది",
+    "seller_mode_deactivated": "సెల్లర్ మోడ్ డీయాక్టివేట్ చేయబడింది",
+    "wishlist": "విష్‌లిస్ట్",
+    "addresses": "చిరునామాలు",
+    "payment_methods": "చెల్లింపు పద్ధతులు",
+    "help_and_support": "సహాయం & మద్దతు",
+    "about": "గురించి",
+    "sure_logout": "మీరు ఖచ్చితంగా లాగ్ అవుట్ చేయాలనుకుంటున్నారా?",
+    "sent_to": "దీనికి పంపబడింది",
+    "resend_otp": "OTPని మళ్ళీ పంపండి",
+    "resend_in": "మళ్ళీ పంపండి",
+    "change_number": "సంఖ్యను మార్చండి"
 }

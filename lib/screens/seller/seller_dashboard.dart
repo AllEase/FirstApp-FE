@@ -1,7 +1,10 @@
+import 'package:vora/coming_soon_screen.dart';
+import 'package:vora/config/app_colors.dart';
+
 import 'manage_product_screen.dart';
 import 'package:flutter/material.dart';
-// import 'package:provider/provider.dart';
-// import 'user_provider.dart';
+import 'package:provider/provider.dart';
+import '../../providers/user_provider.dart';
 import '../../profile_screen.dart';
 import 'add_product_screen.dart';
 
@@ -10,11 +13,13 @@ class SellerDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final Color primaryColor = userProvider.primaryColor;
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
         title: const Text('Seller Dashboard'),
-        backgroundColor: const Color(0xFF4F46E5),
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
@@ -39,10 +44,10 @@ class SellerDashboard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFF4F46E5), Color(0xFF9333EA)],
+                  colors: [primaryColor, const Color(0xFF10B981)],
                 ),
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -161,6 +166,7 @@ class SellerDashboard extends StatelessWidget {
                   ),
                 );
               },
+              primaryColor: primaryColor,
             ),
             const SizedBox(height: 12),
             _buildActionButton(
@@ -175,20 +181,37 @@ class SellerDashboard extends StatelessWidget {
                   ),
                 );
               },
+              primaryColor: primaryColor,
             ),
             const SizedBox(height: 12),
             _buildActionButton(
               icon: Icons.receipt_long_outlined,
               title: 'View Orders',
               subtitle: 'Check and process orders',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ComingSoonScreen(),
+                  ),
+                );
+              },
+              primaryColor: primaryColor,
             ),
             const SizedBox(height: 12),
             _buildActionButton(
               icon: Icons.analytics_outlined,
               title: 'Analytics',
               subtitle: 'View sales reports and insights',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ComingSoonScreen(),
+                  ),
+                );
+              },
+              primaryColor: primaryColor,
             ),
           ],
         ),
@@ -250,6 +273,7 @@ class SellerDashboard extends StatelessWidget {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    required Color primaryColor,
   }) {
     return InkWell(
       onTap: onTap,
@@ -275,7 +299,7 @@ class SellerDashboard extends StatelessWidget {
                 color: const Color(0xFFEFF6FF),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: const Color(0xFF4F46E5), size: 24),
+              child: Icon(icon, color: primaryColor, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(

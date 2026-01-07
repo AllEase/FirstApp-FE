@@ -1,4 +1,3 @@
-import '/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
@@ -62,9 +61,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    final Color primaryColor = userProvider.isSellerMode
-        ? AppColors.sellerAppColor
-        : AppColors.userAppColor;
+    final Color primaryColor = userProvider.primaryColor;
     final checkoutItems = _getCheckoutItems(userProvider);
     final subtotal = _calculateSubtotal(checkoutItems);
     final shipping = subtotal > 50 ? 0.0 : 5.99;

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vora/config/app_colors.dart';
 import '../config/api_urls.dart';
 import '../api_client.dart';
 import '../models/user_model.dart';
@@ -16,6 +17,7 @@ class UserProvider extends ChangeNotifier {
   String _token = '';
   String _error = '';
   User? _user;
+  Color _primaryColor = AppColors.userAppColor;
 
   // Getters
   bool get isInitialized => _isInitialized;
@@ -27,6 +29,7 @@ class UserProvider extends ChangeNotifier {
   List<Map<String, dynamic>> get addresses => _addresses;
   String get token => _token;
   String get error => _error;
+  Color get primaryColor => _primaryColor;
 
   /// Loads saved state from local storage on app startup
   Future<void> init() async {
@@ -61,6 +64,9 @@ class UserProvider extends ChangeNotifier {
     } else {
       _addresses = [];
     }
+    _primaryColor = _isSellerMode
+        ? AppColors.sellerAppColor
+        : AppColors.userAppColor;
 
     _isInitialized = true;
     notifyListeners();
@@ -159,6 +165,9 @@ class UserProvider extends ChangeNotifier {
   /// Toggles Seller Mode and persists it until manually turned off
   Future<void> toggleSellerMode() async {
     _isSellerMode = !_isSellerMode;
+    _primaryColor = _isSellerMode
+        ? AppColors.sellerAppColor
+        : AppColors.userAppColor;
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isSellerMode', _isSellerMode);

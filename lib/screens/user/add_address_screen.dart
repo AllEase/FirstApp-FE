@@ -74,14 +74,13 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    final Color primaryColor = userProvider.isSellerMode
-        ? const Color(0xFF0F766E)
-        : const Color(0xFF4F46E5);
+    final Color primaryColor = userProvider.primaryColor;
     final type = widget.index == null ? "1" : "2";
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.index == null ? 'Add Address' : 'Edit Address'),
         backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

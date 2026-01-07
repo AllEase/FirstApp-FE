@@ -50,5 +50,19 @@
     "error_first_name": "Please enter first name",
     "error_last_name": "Please enter last name",
     "already_have_account": "Already have an account? ",
-    "demo_user": "Demo User"
+    "demo_user": "Demo User",
+    "in_seller_mode": "You are in seller mode",
+    "manage_your_products": "Switch to manage your products",
+    "seller_mode_activated": "Seller mode activated",
+    "seller_mode_deactivated": "Seller mode deactivated",
+    "wishlist": "Wishlist",
+    "addresses": "Addresses",
+    "payment_methods": "Payment Methods",
+    "help_and_support": "Help & Support",
+    "about": "about",
+    "sure_logout": "Are you sure you want to log out?",
+    "sent_to": "Sent to",
+    "resend_otp": "Resend OTP",
+    "resend_in": "Resend in",
+    "change_number": "Change Number"
 }

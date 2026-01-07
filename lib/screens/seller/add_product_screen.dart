@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:vora/providers/user_provider.dart';
 import '../../config/api_urls.dart';
 import '../../api_client.dart';
 
@@ -191,11 +193,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final Color primaryColor = userProvider.primaryColor;
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
         title: const Text('Add New Product'),
-        backgroundColor: const Color(0xFF4F46E5),
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         actions: [
           TextButton(

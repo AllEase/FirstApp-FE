@@ -1,5 +1,8 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:vora/coming_soon_screen.dart';
+import 'package:vora/config/app_colors.dart';
+import 'package:vora/screens/user/wishlist_screen.dart';
 import 'providers/user_provider.dart';
 import 'providers/locale_provider.dart';
 import 'main.dart';
@@ -9,10 +12,13 @@ import '../../localization/app_localizations.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
-  static Future<String> getUserName(UserProvider userProvider) async {
+  static Future<String> getUserName(
+    UserProvider userProvider,
+    BuildContext context,
+  ) async {
     final name = userProvider.user?.firstName;
     if (name == null || name.trim().isEmpty) {
-      return 'Demo User';
+      return context.loc("demo_user");
     }
     return name;
   }
@@ -20,19 +26,20 @@ class ProfileScreen extends StatelessWidget {
   static Future<String> getUserNumber(UserProvider userProvider) async {
     final number = userProvider.user?.number;
     if (number == null || number.trim().isEmpty) {
-      return '';
+      return "";
     }
     return number;
   }
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context);
+    final Color primaryColor = userProvider.primaryColor;
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
         title: Text(context.loc("profile")),
-        backgroundColor: const Color(0xFF4F46E5),
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -42,7 +49,7 @@ class ProfileScreen extends StatelessWidget {
             // Profile Header
             Container(
               width: double.infinity,
-              color: const Color(0xFF4F46E5),
+              color: primaryColor,
               padding: const EdgeInsets.only(bottom: 40),
               child: Column(
                 children: [
@@ -54,17 +61,17 @@ class ProfileScreen extends StatelessWidget {
                       color: Colors.white,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.person,
                       size: 40,
-                      color: Color(0xFF4F46E5),
+                      color: primaryColor,
                     ),
                   ),
                   const SizedBox(height: 12),
                   FutureBuilder<String>(
-                    future: getUserName(userProvider),
+                    future: getUserName(userProvider, context),
                     builder: (context, snapshot) {
-                      String nameToShow = '...';
+                      String nameToShow = "...";
                       if (snapshot.hasData) {
                         nameToShow = snapshot.data!;
                       } else if (snapshot.hasError) {
@@ -120,8 +127,8 @@ class ProfileScreen extends StatelessWidget {
                   Consumer<UserProvider>(
                     builder: (context, userProvider, child) {
                       return SwitchListTile(
-                        title: const Text(
-                          'Seller Mode',
+                        title: Text(
+                          context.loc("seller_mode"),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -130,8 +137,8 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         subtitle: Text(
                           userProvider.isSellerMode
-                              ? 'You are in seller mode'
-                              : 'Switch to manage your products',
+                              ? context.loc("in_seller_mode")
+                              : context.loc("manage_your_products"),
                           style: const TextStyle(
                             fontSize: 14,
                             color: Color(0xFF6B7280),
@@ -147,29 +154,29 @@ class ProfileScreen extends StatelessWidget {
                               SnackBar(
                                 content: Text(
                                   userProvider.isSellerMode
-                                      ? 'Seller mode activated'
-                                      : 'Seller mode deactivated',
+                                      ? context.loc("seller_mode_activated")
+                                      : context.loc("seller_mode_deactivated"),
                                 ),
                                 duration: const Duration(seconds: 2),
-                                backgroundColor: const Color(0xFF4F46E5),
+                                backgroundColor: primaryColor,
                               ),
                             );
                           }
                         },
-                        activeColor: const Color(0xFF4F46E5),
+                        activeColor: primaryColor,
                         secondary: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: userProvider.isSellerMode
-                                ? const Color(0xFFDCEEFE)
-                                : const Color(0xFFF3F4F6),
+                                ? AppColors.sellerAppColor
+                                : AppColors.userAppColor,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
                             Icons.store,
                             color: userProvider.isSellerMode
-                                ? const Color(0xFF4F46E5)
-                                : const Color(0xFF6B7280),
+                                ? AppColors.sellerAppColor
+                                : AppColors.userAppColor,
                           ),
                         ),
                       );
@@ -181,18 +188,32 @@ class ProfileScreen extends StatelessWidget {
                   _buildSettingsTile(
                     icon: Icons.shopping_bag_outlined,
                     title: context.loc("my_orders"),
-                    onTap: () {},
+                    onTap: () {
+                       Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ComingSoonScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const Divider(height: 1),
                   _buildSettingsTile(
                     icon: Icons.favorite_border,
-                    title: 'Wishlist',
-                    onTap: () {},
+                    title: context.loc("wishlist"),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const WishlistScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const Divider(height: 1),
                   _buildSettingsTile(
                     icon: Icons.location_on_outlined,
-                    title: 'Addresses',
+                    title: context.loc("addresses"),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -205,8 +226,15 @@ class ProfileScreen extends StatelessWidget {
                   const Divider(height: 1),
                   _buildSettingsTile(
                     icon: Icons.payment_outlined,
-                    title: 'Payment Methods',
-                    onTap: () {},
+                    title: context.loc("payment_methods"),
+                    onTap: () {
+                       Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ComingSoonScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -231,25 +259,46 @@ class ProfileScreen extends StatelessWidget {
                   _buildSettingsTile(
                     icon: Icons.settings_outlined,
                     title: context.loc("settings"),
-                    onTap: () {},
+                    onTap: () {
+                       Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ComingSoonScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const Divider(height: 1),
                   _buildSettingsTile(
                     icon: Icons.help_outline,
-                    title: 'Help & Support',
-                    onTap: () {},
+                    title: context.loc("help_and_support"),
+                    onTap: () {
+                       Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ComingSoonScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const Divider(height: 1),
                   _buildSettingsTile(
                     icon: Icons.info_outline,
-                    title: context.loc('language'),
+                    title: context.loc("language"),
                     onTap: () => _showLanguagePicker(context),
                   ),
                   const Divider(height: 1),
                   _buildSettingsTile(
                     icon: Icons.info_outline,
-                    title: 'About',
-                    onTap: () {},
+                    title: context.loc("about"),
+                    onTap: () {
+                       Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ComingSoonScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const Divider(height: 1),
                   _buildSettingsTile(
@@ -263,9 +312,9 @@ class ProfileScreen extends StatelessWidget {
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: const Text('Logout'),
-                          content: const Text(
-                            'Are you sure you want to log out?',
+                          title: Text(context.loc("logout")),
+                          content: Text(
+                            context.loc("sure_logout")
                           ),
                           actions: [
                             TextButton(
@@ -350,20 +399,20 @@ class ProfileScreen extends StatelessWidget {
               const Divider(),
               _languageTile(
                 context,
-                'English',
-                const Locale('en'),
+                "English",
+                const Locale("en"),
                 localeProvider,
               ),
               _languageTile(
                 context,
-                'हिंदी (Hindi)',
-                const Locale('hi'),
+                "हिंदी (Hindi)",
+                const Locale("hi"),
                 localeProvider,
               ),
               _languageTile(
                 context,
-                'తెలుగు (Telugu)',
-                const Locale('te'),
+                "తెలుగు (Telugu)",
+                const Locale("te"),
                 localeProvider,
               ),
             ],
