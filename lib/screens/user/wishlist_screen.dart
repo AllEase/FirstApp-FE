@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vora/config/app_colors.dart';
 import '../../api_client.dart';
 import '../../config/api_urls.dart';
 import 'product_detail_screen.dart';
@@ -90,13 +89,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
   Widget build(BuildContext context) {
     // Access theme based on persistent Seller Mode
     final userProvider = Provider.of<UserProvider>(context);
-    final bool isSellerMode = userProvider.isSellerMode;
     final Color primaryColor = userProvider.primaryColor;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: Text(isSellerMode ? "Merchant Favorites" : "My Wishlist"),
+        title: Text("My Wishlist"),
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -210,7 +208,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    '\$${item['price']}',
+                    '\u20B9${item['price']}',
                     style: TextStyle(
                       color: primaryColor,
                       fontWeight: FontWeight.bold,

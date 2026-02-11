@@ -16,6 +16,7 @@ analyzer:
     prefer_final_fields: ignore
     avoid_function_literals_in_foreach_calls: ignore
     curly_braces_in_flow_control_structures: ignore
+    invalid_return_type_for_catch_error: ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:

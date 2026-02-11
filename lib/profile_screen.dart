@@ -2,6 +2,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:vora/coming_soon_screen.dart';
 import 'package:vora/config/app_colors.dart';
+import 'package:vora/screens/user/my_orders_screen.dart';
 import 'package:vora/screens/user/wishlist_screen.dart';
 import 'providers/user_provider.dart';
 import 'providers/locale_provider.dart';
@@ -61,11 +62,7 @@ class ProfileScreen extends StatelessWidget {
                       color: Colors.white,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      Icons.person,
-                      size: 40,
-                      color: primaryColor,
-                    ),
+                    child: Icon(Icons.person, size: 40, color: primaryColor),
                   ),
                   const SizedBox(height: 12),
                   FutureBuilder<String>(
@@ -123,81 +120,90 @@ class ProfileScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Seller Mode Switch
                   Consumer<UserProvider>(
                     builder: (context, userProvider, child) {
-                      return SwitchListTile(
-                        title: Text(
-                          context.loc("seller_mode"),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF111827),
-                          ),
-                        ),
-                        subtitle: Text(
-                          userProvider.isSellerMode
-                              ? context.loc("in_seller_mode")
-                              : context.loc("manage_your_products"),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF6B7280),
-                          ),
-                        ),
-                        value: userProvider.isSellerMode,
-                        onChanged: (value) async {
-                          await userProvider.toggleSellerMode();
-
-                          // Show confirmation message
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  userProvider.isSellerMode
-                                      ? context.loc("seller_mode_activated")
-                                      : context.loc("seller_mode_deactivated"),
-                                ),
-                                duration: const Duration(seconds: 2),
-                                backgroundColor: primaryColor,
+                      final user = userProvider.user;
+                      if (user == null || user.isSeller != true) {
+                        return const SizedBox();
+                      }
+                      return Column(
+                        children: [
+                          SwitchListTile(
+                            title: Text(
+                              context.loc("seller_mode"),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF111827),
                               ),
-                            );
-                          }
-                        },
-                        activeColor: primaryColor,
-                        secondary: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: userProvider.isSellerMode
-                                ? AppColors.sellerAppColor
-                                : AppColors.userAppColor,
-                            borderRadius: BorderRadius.circular(8),
+                            ),
+                            subtitle: Text(
+                              userProvider.isSellerMode
+                                  ? context.loc("in_seller_mode")
+                                  : context.loc("manage_your_products"),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF6B7280),
+                              ),
+                            ),
+                            value: userProvider.isSellerMode,
+                            onChanged: (value) async {
+                              await userProvider.toggleSellerMode();
+
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      userProvider.isSellerMode
+                                          ? context.loc("seller_mode_activated")
+                                          : context.loc(
+                                              "seller_mode_deactivated",
+                                            ),
+                                    ),
+                                    duration: const Duration(seconds: 2),
+                                    backgroundColor: primaryColor,
+                                  ),
+                                );
+                              }
+                            },
+                            activeColor: primaryColor,
+                            secondary: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: userProvider.isSellerMode
+                                    ? AppColors.sellerAppColor
+                                    : AppColors.userAppColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                Icons.store,
+                                color: userProvider.isSellerMode
+                                    ? AppColors.sellerAppColor
+                                    : AppColors.userAppColor,
+                              ),
+                            ),
                           ),
-                          child: Icon(
-                            Icons.store,
-                            color: userProvider.isSellerMode
-                                ? AppColors.sellerAppColor
-                                : AppColors.userAppColor,
-                          ),
-                        ),
+                          const Divider(height: 1),
+                        ],
                       );
                     },
                   ),
-                  const Divider(height: 1),
 
                   // Other Settings Options
                   _buildSettingsTile(
                     icon: Icons.shopping_bag_outlined,
                     title: context.loc("my_orders"),
                     onTap: () {
-                       Navigator.push(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ComingSoonScreen(),
+                          builder: (context) => const MyOrdersScreen(),
                         ),
                       );
                     },
                   ),
                   const Divider(height: 1),
+
                   _buildSettingsTile(
                     icon: Icons.favorite_border,
                     title: context.loc("wishlist"),
@@ -211,6 +217,7 @@ class ProfileScreen extends StatelessWidget {
                     },
                   ),
                   const Divider(height: 1),
+
                   _buildSettingsTile(
                     icon: Icons.location_on_outlined,
                     title: context.loc("addresses"),
@@ -224,11 +231,12 @@ class ProfileScreen extends StatelessWidget {
                     },
                   ),
                   const Divider(height: 1),
+
                   _buildSettingsTile(
                     icon: Icons.payment_outlined,
                     title: context.loc("payment_methods"),
                     onTap: () {
-                       Navigator.push(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const ComingSoonScreen(),
@@ -260,7 +268,7 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.settings_outlined,
                     title: context.loc("settings"),
                     onTap: () {
-                       Navigator.push(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const ComingSoonScreen(),
@@ -273,7 +281,7 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.help_outline,
                     title: context.loc("help_and_support"),
                     onTap: () {
-                       Navigator.push(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const ComingSoonScreen(),
@@ -292,7 +300,7 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.info_outline,
                     title: context.loc("about"),
                     onTap: () {
-                       Navigator.push(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const ComingSoonScreen(),
@@ -313,9 +321,7 @@ class ProfileScreen extends StatelessWidget {
                         context: context,
                         builder: (context) => AlertDialog(
                           title: Text(context.loc("logout")),
-                          content: Text(
-                            context.loc("sure_logout")
-                          ),
+                          content: Text(context.loc("sure_logout")),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),

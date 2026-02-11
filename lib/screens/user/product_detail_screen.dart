@@ -144,7 +144,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            "\$${_selectedVariant?['price'] ?? '0.00'}",
+            "\u20B9${_selectedVariant?['price'] ?? '0.00'}",
             style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: primaryColor),
           ),
         ],

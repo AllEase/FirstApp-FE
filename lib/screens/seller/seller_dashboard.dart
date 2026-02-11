@@ -1,5 +1,4 @@
 import 'package:vora/coming_soon_screen.dart';
-import 'package:vora/config/app_colors.dart';
 
 import 'manage_product_screen.dart';
 import 'package:flutter/material.dart';
@@ -104,7 +103,7 @@ class SellerDashboard extends StatelessWidget {
                 Expanded(
                   child: _buildStatCard(
                     title: 'Total Sales',
-                    value: '\$12,450',
+                    value: '\u20B912,450',
                     icon: Icons.attach_money,
                     color: const Color(0xFF10B981),
                   ),

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import '/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../profile_screen.dart';
@@ -173,7 +172,7 @@ class _ShoppingHomePageState extends State<ShoppingHomePage> {
                       physics: const AlwaysScrollableScrollPhysics(),
                       child: Column(
                         children: [
-                          _buildHeroBanner(primaryColor, isSellerMode),
+                          // _buildHeroBanner(primaryColor, isSellerMode),
                           _buildProductsSection(isSellerMode),
                           if (_isLoadingMore)
                             Padding(
@@ -194,7 +193,7 @@ class _ShoppingHomePageState extends State<ShoppingHomePage> {
                       ),
                     ),
             ),
-            _buildFooter(),
+            // _buildFooter(),
           ],
         ),
       ),
@@ -338,36 +337,36 @@ class _ShoppingHomePageState extends State<ShoppingHomePage> {
     );
   }
 
-  Widget _buildHeroBanner(Color primaryColor, bool isSellerMode) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [primaryColor, primaryColor.withOpacity(0.7)],
-        ),
-      ),
-      padding: const EdgeInsets.all(30),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            isSellerMode ? 'Seller Dashboard' : 'Winter Sale 2025',
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          Text(
-            isSellerMode
-                ? 'Manage your business inventory'
-                : 'Exclusive deals just for you',
-            style: const TextStyle(fontSize: 16, color: Colors.white70),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildHeroBanner(Color primaryColor, bool isSellerMode) {
+  //   return Container(
+  //     width: double.infinity,
+  //     decoration: BoxDecoration(
+  //       gradient: LinearGradient(
+  //         colors: [primaryColor, primaryColor.withOpacity(0.7)],
+  //       ),
+  //     ),
+  //     padding: const EdgeInsets.all(30),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           isSellerMode ? 'Seller Dashboard' : 'Winter Sale 2025',
+  //           style: const TextStyle(
+  //             fontSize: 28,
+  //             fontWeight: FontWeight.bold,
+  //             color: Colors.white,
+  //           ),
+  //         ),
+  //         Text(
+  //           isSellerMode
+  //               ? 'Manage your business inventory'
+  //               : 'Exclusive deals just for you',
+  //           style: const TextStyle(fontSize: 16, color: Colors.white70),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildProductsSection(bool isSellerMode) {
     return Padding(
@@ -407,16 +406,16 @@ class _ShoppingHomePageState extends State<ShoppingHomePage> {
     );
   }
 
-  Widget _buildFooter() {
-    return Container(
-      width: double.infinity,
-      color: const Color(0xFF111827),
-      padding: const EdgeInsets.all(16),
-      child: const Center(
-        child: Text('© 2025 ShopHub', style: TextStyle(color: Colors.white)),
-      ),
-    );
-  }
+  // Widget _buildFooter() {
+  //   return Container(
+  //     width: double.infinity,
+  //     color: const Color(0xFF111827),
+  //     padding: const EdgeInsets.all(16),
+  //     child: const Center(
+  //       child: Text('© 2025 ShopHub', style: TextStyle(color: Colors.white)),
+  //     ),
+  //   );
+  // }
 }
 
 // --- Optimized Product Card Widget using Common Heart Widget ---
@@ -481,7 +480,7 @@ class _ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '\$${product.price.toStringAsFixed(2)}',
+                    '\u20B9${product.price.toStringAsFixed(2)}',
                     style: TextStyle(
                       color: isSellerMode
                           ? const Color(0xFF0F766E)

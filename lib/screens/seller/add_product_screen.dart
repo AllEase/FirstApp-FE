@@ -631,7 +631,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       child: TextField(
                         keyboardType: TextInputType.number,
                         onChanged: (val) => _updateVariant(key, 'price', val),
-                        decoration: _variantInputDecoration('\$'),
+                        decoration: _variantInputDecoration('\u20B9'),
                       ),
                     ),
                     const SizedBox(width: 8),

@@ -147,7 +147,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  '\$${product['price']}',
+                  '\u20B9${product['price']}',
                   style: const TextStyle(
                     color: Color(0xFF0F766E),
                     fontWeight: FontWeight.w600,

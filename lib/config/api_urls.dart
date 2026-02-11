@@ -14,4 +14,7 @@ class ApiUrls {
   static String get getSavedlist => '$baseUrl/firstApp/getSavedlist/';
   static String get saveAddresses => '$baseUrl/firstApp/saveAddresses/';
   static String get getProductDetails => '$baseUrl/firstApp/getProductDetails/';
+  static String get createOrder => '$baseUrl/firstApp/createOrder/';
+  static String get verifyPayment => '$baseUrl/firstApp/verifyPayment/';
+  static String get getUserOrders => '$baseUrl/firstApp/getUserOrders/';
 }

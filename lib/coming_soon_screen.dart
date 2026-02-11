@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:vora/config/app_colors.dart';
 import '../../providers/user_provider.dart';
 import 'package:provider/provider.dart';
 

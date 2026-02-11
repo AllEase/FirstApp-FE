@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
-import '../../widgets/custom_text_field.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../widgets/shipping_address.dart';
+import 'dart:convert';
+
+import "../../payment/razorpay_service.dart";
+import '../../api_client.dart';
+import '../../config/api_urls.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final dynamic singleItem;
@@ -24,7 +29,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _addressController = TextEditingController();
 
   String _selectedCity = 'Tanuku';
-  String _selectedPaymentMethod = 'credit_card';
+  String _selectedPaymentMethod = 'cod';
 
   final List<String> _cities = ['Tanuku', 'Velpur', 'Relangi'];
 
@@ -64,8 +69,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final Color primaryColor = userProvider.primaryColor;
     final checkoutItems = _getCheckoutItems(userProvider);
     final subtotal = _calculateSubtotal(checkoutItems);
-    final shipping = subtotal > 50 ? 0.0 : 5.99;
-    final tax = subtotal * 0.08;
+    final shipping = subtotal > 499 ? 0.0 : 49.0;
+    final tax = subtotal * 0.1;
     final total = subtotal + shipping + tax;
 
     return Scaffold(
@@ -96,9 +101,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               children: [
                 _buildStepIndicator(0, 'Shipping', primaryColor),
                 _buildStepLine(0 < _currentStep, primaryColor),
-                _buildStepIndicator(1, 'Payment', primaryColor),
+                _buildStepIndicator(1, 'Review', primaryColor),
                 _buildStepLine(1 < _currentStep, primaryColor),
-                _buildStepIndicator(2, 'Review', primaryColor),
+                _buildStepIndicator(2, 'Payment', primaryColor),
               ],
             ),
           ),
@@ -196,7 +201,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           ],
                         ),
                       )
-                    : _currentStep == 1
+                    : _currentStep == 2
                     ? _buildPaymentForm(primaryColor)
                     : _buildReviewStep(
                         checkoutItems,
@@ -211,7 +216,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
 
           // Bottom Action Bar
-          _buildBottomBar(checkoutItems, total, primaryColor),
+          _buildBottomBar(checkoutItems, total, userProvider, primaryColor),
         ],
       ),
     );
@@ -274,71 +279,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           child: Column(
             children: [
               _buildPaymentOption(
-                'credit_card',
-                'Credit Card',
-                Icons.credit_card,
-                primaryColor,
-              ),
-              const SizedBox(height: 12),
-              _buildPaymentOption(
-                'paypal',
-                'PayPal',
-                Icons.account_balance_wallet,
-                primaryColor,
-              ),
-              const SizedBox(height: 12),
-              _buildPaymentOption(
-                'apple_pay',
-                'Apple Pay',
-                Icons.apple,
+                'razorpay',
+                'Online Payment',
+                Icons.payment,
                 primaryColor,
               ),
               const SizedBox(height: 12),
               _buildPaymentOption(
                 'cod',
                 'Cash On Delivery',
-                Icons.apple,
+                Icons.money,
                 primaryColor,
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        if (_selectedPaymentMethod == 'credit_card')
-          _buildSectionCard(
-            title: 'Card Details',
-            child: Column(
-              children: [
-                CustomTextField(
-                  controller: TextEditingController(),
-                  label: 'Card Number',
-                  icon: Icons.credit_card,
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        controller: TextEditingController(),
-                        label: 'MM/YY',
-                        icon: Icons.calendar_today,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: CustomTextField(
-                        controller: TextEditingController(),
-                        label: 'CVV',
-                        icon: Icons.lock_outline,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
       ],
     );
   }
@@ -404,7 +359,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     ),
                     Text(
-                      '\$${item['totalPrice'].toStringAsFixed(2)}',
+                      '\u20B9${item['totalPrice'].toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -565,7 +520,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ),
           Text(
-            '\$${amount.toStringAsFixed(2)}',
+            '\u20B9${amount.toStringAsFixed(2)}',
             style: TextStyle(
               fontSize: isTotal ? 18 : 14,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
@@ -580,6 +535,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget _buildBottomBar(
     List<dynamic> items,
     double total,
+    UserProvider userProvider,
     Color primaryColor,
   ) {
     return Container(
@@ -636,7 +592,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       });
                     } else {
                       // Place order
-                      _placeOrder(items, total, primaryColor);
+                      _handlePlaceOrder(
+                        items,
+                        total,
+                        userProvider,
+                        primaryColor,
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -648,7 +609,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   child: Text(
                     _currentStep == 2
-                        ? 'Place Order - \$${total.toStringAsFixed(2)}'
+                        ? 'Place Order - \u20B9${total.toStringAsFixed(2)}'
                         : 'Continue',
                     style: const TextStyle(
                       fontSize: 16,
@@ -706,7 +667,95 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  void _placeOrder(dynamic items, double total, Color primaryColor) {
+  final razorpayService = RazorpayService();
+  Future<void> _handlePlaceOrder(
+    dynamic items,
+    double total,
+    UserProvider userProvider,
+    Color primaryColor,
+  ) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      final response = await ApiClient.post(ApiUrls.createOrder, {
+        "user_id": userProvider.user!.userId,
+        "items": items,
+        "total": total,
+        "payment_method": _selectedPaymentMethod,
+        "shipping_address": {
+          "name": _nameController.text,
+          "email": _emailController.text,
+          "phone": _phoneController.text,
+          "street": _addressController.text,
+          "city": _selectedCity,
+          "pin": _zipController.text,
+          "state": _stateController.text,
+          "country": _countryController.text,
+        },
+      });
+
+      Navigator.pop(context);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (_selectedPaymentMethod == "cod") {
+          _showOrderSuccessDialog(items, total, primaryColor);
+        } else {
+          _startRazorpayFlow(data, total, items, primaryColor);
+        }
+      } else {
+        _showErrorSnackBar("Failed to create order on server");
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      _showErrorSnackBar("Error: $e");
+    }
+  }
+
+  void _startRazorpayFlow(
+    Map data,
+    double total,
+    dynamic items,
+    Color primaryColor,
+  ) {
+    razorpayService.onSuccess = (paymentId, orderId, signature) async {
+      final verifyResp = await ApiClient.post(ApiUrls.verifyPayment, {
+        "razorpay_payment_id": paymentId,
+        "razorpay_order_id": orderId,
+        "razorpay_signature": signature,
+      });
+      if (verifyResp.statusCode == 200) {
+        _showOrderSuccessDialog(items, total, primaryColor);
+      } else {
+        _showErrorSnackBar("Payment verification failed!");
+      }
+    };
+
+    razorpayService.onFailure = (err) {
+      _showErrorSnackBar("Payment Failed: $err");
+    };
+
+    razorpayService.openCheckout(
+      orderId: data["razorpay_order_id"],
+      amount: (total * 100).toInt(),
+      name: "ShopHub",
+      phone: dotenv.env['NUMBER'] ?? '',
+      email: dotenv.env['MAIL'] ?? '',
+      primaryColor: primaryColor,
+    );
+  }
+
+  // Your existing UI code moved into a helper function
+  void _showOrderSuccessDialog(
+    dynamic items,
+    double total,
+    Color primaryColor,
+  ) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -735,35 +784,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Order Total: \$${total.toStringAsFixed(2)}',
+              'Order Total: \u20B9${total.toStringAsFixed(2)}',
               style: TextStyle(
                 fontSize: 16,
                 color: primaryColor,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'Thank you for your purchase!',
-              style: TextStyle(color: Color(0xFF6B7280)),
-              textAlign: TextAlign.center,
-            ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // final userProvider = Provider.of<UserProvider>(
-                  //   context,
-                  //   listen: false,
-                  // );
-                  if (widget.singleItem == null) {
-                    // userProvider.clearCart();
-                  }
-                  Navigator.of(ctx).pop(); // Close dialog
-                  Navigator.of(
-                    context,
-                  ).popUntil((route) => route.isFirst); // Go to home
+                  Navigator.of(ctx).pop();
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
@@ -785,5 +819,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
       ),
     );
+  }
+
+  void _showErrorSnackBar(String msg) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
   }
 }
